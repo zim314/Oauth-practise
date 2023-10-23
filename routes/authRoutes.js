@@ -1,14 +1,16 @@
 import 'dotenv/config';
 import express from 'express';
 import passport from 'passport';
-import googleStrategy from 'passport-google-oauth20';
+import { Strategy as googleStrategy }  from 'passport-google-oauth20';
 
 passport.use(
     new googleStrategy({
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         callbackURL: '/auth/google/redirect',
-    }, (accessToken, refreshToken, profile, done) => {})
+    }, (accessToken, refreshToken, profile, done) => {
+        console.log(profile)
+    })
 )
 
 const router = express.Router();
@@ -23,5 +25,13 @@ router.get('/google', passport.authenticate('google',
         scope: ['profile', 'email'],     
     }
 ));
+
+router.use(
+    '/google/redirect', 
+    passport.authenticate('google'), 
+    (req, res) => {
+        res.send('123')
+    } 
+);
 
 export default router;
