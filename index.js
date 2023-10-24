@@ -3,6 +3,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import authRoutes from './routes/authRoutes.js';
 import session from 'express-session';
+import passport from 'passport';
 
 const app = express();
 
@@ -14,6 +15,8 @@ app.use(session({
     saveUninitialized: false,
     cookie: { secure: false },
 }));
+app.use(passport.initialize());
+app.use(passport.session());
 
 mongoose
     .connect('mongodb://127.0.0.1:27017/OauthPractise')

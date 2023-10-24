@@ -3,6 +3,8 @@ import passport from 'passport';
 import { Strategy as googleStrategy }  from 'passport-google-oauth20';
 import user from '../models/user.js';
 
+passport.serializeUser((user, done) => done(null, user._id));
+
 passport.use(
     new googleStrategy({
         clientID: process.env.GOOGLE_CLIENT_ID,
@@ -10,12 +12,8 @@ passport.use(
         callbackURL: '/auth/google/redirect',
     }, async (accessToken, refreshToken, profile, done) => {
         try {
-            console.log(profile)
-
             const verifyUser = await user.findOne({ googleID: profile.id }).exec();
-
             if(verifyUser) {
-                console.log('有資料');
                 done(null, verifyUser);
             } else {
                 const newUser = new user({
