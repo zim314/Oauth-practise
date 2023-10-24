@@ -26,6 +26,6 @@ mongoose
 app.use('/auth', authRoutes);
 app.use('/profile', profileRoutes);
 
-app.get('/', (req, res) => res.render('index'));
+app.get('/', (req, res) => res.render('index', { user: req.user }));
 
 app.listen(3535, () => console.log('正在聆聽伺服器 port: 3535'));

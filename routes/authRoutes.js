@@ -35,7 +35,7 @@ passport.use(
 
 const router = express.Router();
 
-router.get('/login', (req, res) => res.render('login'));
+router.get('/login', (req, res) => res.render('login', { user: req.user }));
 
 router.get('/logout', (req, res) => req.logOut(() => res.redirect('/')));
 
