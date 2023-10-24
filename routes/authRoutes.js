@@ -2,16 +2,35 @@ import 'dotenv/config';
 import express from 'express';
 import passport from 'passport';
 import { Strategy as googleStrategy }  from 'passport-google-oauth20';
+import user from '../models/user.js';
 
 passport.use(
     new googleStrategy({
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         callbackURL: '/auth/google/redirect',
-    }, (accessToken, refreshToken, profile, done) => {
-        console.log(profile)
+    }, async (accessToken, refreshToken, profile, done) => {
+        try {
+            console.log(profile)
+
+            const verifyUser = await user.findOne({ googleID: profile.id }).exec();
+
+            if(verifyUser) {
+                console.log('有資料');
+                done(null, verifyUser);
+            } else {
+                const newUser = new user({
+                    email: profile.emails[0].valuse,
+                    name: profile.name.familyName +  profile.name.givenName,
+                    googleID: profile.id,
+                    thumbnail: profile.photos[0].value,
+                });
+                newUser.save();
+                done(null, newUser);
+            }
+        } catch { () => console.log('google passport 錯誤') };
     })
-)
+);
 
 const router = express.Router();
 
