@@ -1,11 +1,11 @@
 import express from 'express';
 import passport from 'passport';
 import { Strategy as googleStrategy }  from 'passport-google-oauth20';
-import user from '../models/user.js';
+import User from '../models/user.js';
 
 passport.serializeUser((user, done) => done(null, user._id));
 passport.deserializeUser(async (_id, done) => {
-    const foundUser = await user.findOne({ _id });
+    const foundUser = await User.findOne({ _id });
     done(null, foundUser);
 })
 
@@ -16,11 +16,11 @@ passport.use(
         callbackURL: '/auth/google/redirect',
     }, async (accessToken, refreshToken, profile, done) => {
         try {
-            const verifyUser = await user.findOne({ googleID: profile.id }).exec();
+            const verifyUser = await User.findOne({ googleID: profile.id }).exec();
             if(verifyUser) {
                 done(null, verifyUser);
             } else {
-                const newUser = new user({
+                const newUser = new User({
                     email: profile.emails[0].valuse,
                     name: profile.name.familyName +  profile.name.givenName,
                     googleID: profile.id,
@@ -38,6 +38,24 @@ const router = express.Router();
 router.get('/login', (req, res) => res.render('login', { user: req.user }));
 
 router.get('/logout', (req, res) => req.logOut(() => res.redirect('/')));
+
+router.get('/signup', (req, res) => res.render('signup', { user: req.user }));
+
+router.post('/signup', async (req, res) => {
+    const { name, password, email } = req.body;
+
+    if(password.length < 8) {
+        req.flash('error_message', '密碼過短 請輸入8~12位的英文或數字');
+        res.redirect('/auth/signup');
+    } 
+
+    if(password.length > 12) {
+        req.flash('error_message', '密碼過長 請輸入8~12位的英文或數字')
+        res.redirect('/auth/signup');
+    };
+
+
+});
 
 router.get('/google', passport.authenticate('google', 
     {
