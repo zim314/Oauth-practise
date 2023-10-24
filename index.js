@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import mongoose from 'mongoose';
 import authRoutes from './routes/authRoutes.js';
+import profileRoutes from './routes/profileRoutes.js';
 import session from 'express-session';
 import passport from 'passport';
 
@@ -23,6 +24,7 @@ mongoose
     .then(() => console.log('以連接到MongoDB'));
 
 app.use('/auth', authRoutes);
+app.use('/profile', profileRoutes);
 
 app.get('/', (req, res) => res.render('index'));
 

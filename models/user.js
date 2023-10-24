@@ -9,7 +9,7 @@ const userSchema = new Schema({
     },
     googleID: { type: String },
     thumbnail: { type: String },
-    data: {
+    date: {
         type: Date,
         default: Date.now,
     },

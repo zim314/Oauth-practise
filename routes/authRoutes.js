@@ -4,6 +4,10 @@ import { Strategy as googleStrategy }  from 'passport-google-oauth20';
 import user from '../models/user.js';
 
 passport.serializeUser((user, done) => done(null, user._id));
+passport.deserializeUser(async (_id, done) => {
+    const foundUser = await user.findOne({ _id });
+    done(null, foundUser);
+})
 
 passport.use(
     new googleStrategy({
@@ -37,7 +41,6 @@ router.get('/google', passport.authenticate('google',
     {
         //可以選擇登入帳號
         prompt: 'select_account',
-        //要請求的資源
         scope: ['profile', 'email'],     
     }
 ));
@@ -46,7 +49,7 @@ router.use(
     '/google/redirect', 
     passport.authenticate('google'), 
     (req, res) => {
-        res.send('123')
+        res.redirect('/profile');
     } 
 );
 
