@@ -30,7 +30,7 @@ passport.use(
                 newUser.save();
                 done(null, newUser);
             }
-        } catch { () => console.log('google passport 錯誤') };
+        } catch {() => console.log('google passport 錯誤')};
     })
 );
 
@@ -46,7 +46,7 @@ router.post('/signup', async (req, res) => {
     try {
         const { name, password, email } = req.body;
         const verifyEmail = await User.findOne({ email }).exec();
-            
+
         if(verifyEmail) {
             req.flash('error_message', '此信箱已被註冊，請使用其他信箱');
             res.redirect('/auth/signup');
@@ -63,8 +63,8 @@ router.post('/signup', async (req, res) => {
         const hashPassword = await bcrypt.hash(password, 12);
         const newUser = new User({ name, hashPassword, email });
         newUser.save();
-        req.flash('success_message', '恭喜註冊成功，現在可以開始使用POST系統！');
-        res.redirect('/auth/signup');
+        req.flash('success_message', '恭喜註冊成功，登入後即可開始使用POST系統！');
+        res.redirect('/auth/login');
     } catch {() => console.log('註冊錯誤')} 
 });
 
@@ -79,9 +79,7 @@ router.get('/google', passport.authenticate('google',
 router.use(
     '/google/redirect', 
     passport.authenticate('google'), 
-    (req, res) => {
-        res.redirect('/profile');
-    } 
+    (req, res) => res.redirect('/profile')
 );
 
 export default router;
