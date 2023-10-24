@@ -1,6 +1,7 @@
 import express from 'express';
 import passport from 'passport';
 import { Strategy as googleStrategy }  from 'passport-google-oauth20';
+import localStrategy from 'passport-local';
 import User from '../models/user.js';
 import bcrypt from 'bcrypt';
 
@@ -34,6 +35,18 @@ passport.use(
     })
 );
 
+passport.use(new localStrategy(
+    async (username, password, done) => {
+        try {
+            const foundUser = await User.findOne({ email: username }).exec();
+            if(!foundUser) return done(null, false);
+            const verifyPassword = await bcrypt.compare(password, foundUser.password);
+            if(!verifyPassword) return done(null, false);
+            done(null, foundUser);
+        } catch {() => console.log('local passport 錯誤')}
+    }
+));
+
 const router = express.Router();
 
 router.get('/login', (req, res) => res.render('login', { user: req.user }));
@@ -61,12 +74,17 @@ router.post('/signup', async (req, res) => {
         }
         
         const hashPassword = await bcrypt.hash(password, 12);
-        const newUser = new User({ name, hashPassword, email });
+        const newUser = new User({ name, password: hashPassword, email });
         newUser.save();
         req.flash('success_message', '恭喜註冊成功，登入後即可開始使用POST系統！');
         res.redirect('/auth/login');
     } catch {() => console.log('註冊錯誤')} 
 });
+
+router.post('/login', passport.authenticate('local', {
+    failureRedirect: '/auth/login',
+    failureFlash: '登入失敗，帳號或密碼不正確',
+}), (_, res) => res.redirect('/profile'));
 
 router.get('/google', passport.authenticate('google', 
     {
@@ -79,7 +97,7 @@ router.get('/google', passport.authenticate('google',
 router.use(
     '/google/redirect', 
     passport.authenticate('google'), 
-    (req, res) => res.redirect('/profile')
+    (_, res) => res.redirect('/profile')
 );
 
 export default router;
