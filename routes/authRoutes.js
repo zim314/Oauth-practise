@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import express from 'express';
 import passport from 'passport';
 import { Strategy as googleStrategy }  from 'passport-google-oauth20';
